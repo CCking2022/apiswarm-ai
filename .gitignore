@@ -1,0 +1,15 @@
+# 忽略本地真实配置
+.env
+.env.local
+.env.prod
+
+# 缓存、运行文件
+__pycache__/
+*.pyc
+logs/
+output/
+
+# tasks：tasks目录只保留samples，done/、零散文件、其他子目录全部不上传
+tasks/*
+!tasks/samples/
+!tasks/samples/**

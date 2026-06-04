@@ -1,0 +1,400 @@
+# ====================== 邮箱服务器配置（以QQ邮箱为例） ======================
+imap:
+  server: imap.qq.com       
+  port: 993
+
+smtp:
+  server: smtp.qq.com
+  port: 465
+
+# ====================== 邮箱账号 ======================
+email:
+  bee_address: your_bee_eamil@qq.com
+  bee_password: env::BEE_EMAIL_PASSWORD
+  master_email: your_master_eamil@qq.com
+
+# ====================== 检查间隔（秒） ======================
+check:
+  min_interval: 3
+  max_interval: 8
+
+# ====================== 任务保存目录 ======================
+task:
+  dir: tasks
+
+# ====================== AI 模型池配置 ======================
+model_pool:
+  # 默认模型参数（可以被每个模型单独覆盖）
+  defaults:
+    temperature: 0.7
+    max_tokens: 2000
+    top_p: 1.0
+    frequency_penalty: 0.0
+    presence_penalty: 0.0
+    timeout: 60
+    disable_proxy: false
+    max_retries: 3
+  
+  # 模型列表
+  models:
+    # 1. Ollama 本地模型
+    - model_id: ollama-1
+      model_name: gpt-oss:120b-cloud
+      model_type: OLLAMA
+      api_key: null
+      endpoint: http://localhost:11434/api/generate
+      temperature: 0.8
+      max_tokens: 4096
+      timeout: 120
+      system_prompt: "你是一个智能助手，请用中文回答"
+      disable_proxy: true
+      max_threads: 5
+      model_group: LONG_TEXT
+    
+    # 2. 深度求索（DeepSeek）
+    - model_id: deep-seek-1
+      model_name: deepseek-chat
+      model_type: DEEPSEEK
+      api_key: env::DEEPSEEK_API_KEY
+      endpoint: https://api.deepseek.com/v1/chat/completions
+      temperature: 0.7
+      max_tokens: 16384
+      timeout: 120
+      system_prompt: "你是一个智能助手"
+      max_threads: 30
+      model_group: HYBRID
+      
+      
+    # 3. 阿里云百炼（DeepSeek）
+    - model_id: aliyun-1
+      model_name: deepseek-v4-pro
+      model_type: ALIYUN_DASHSCOPE
+      api_key: env::BAILIAN_API_KEY
+      endpoint: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      temperature: 0.7
+      max_tokens: 16384
+      top_p: 0.9
+      timeout: 120
+      disable_proxy: true
+      system_prompt: "你是一个智能助手"
+      max_threads: 10
+      model_group: HYBRID
+      
+    # 4. 火山方舟
+    - model_id: volc-1
+      model_name: ep-20260504223530-kt9mm
+      model_type: VOLC_ARK
+      api_key: env::ARK_API_KEY
+      endpoint: https://ark.cn-beijing.volces.com/api/v3/chat/completions
+      temperature: 0.7
+      max_tokens: 4096
+      timeout: 180
+      disable_proxy: true
+      system_prompt: "你是一个智能助手"
+      max_threads: 5
+      model_group: LITERATURE
+      
+    # 5. 智谱 GLM-4.7
+    - model_id: zhipu-1
+      model_name: glm-4.7-flash
+      model_type: ZHIPU
+      api_key: env::GLM_API_KEY
+      endpoint: https://open.bigmodel.cn/api/paas/v4/chat/completions
+      temperature: 0.7
+      max_tokens: 4096
+      top_p: 0.95
+      timeout: 60
+      system_prompt: "你是一个智能助手"
+      max_threads: 1
+      model_group: LIGHT_WEIGHT
+
+    # 6. NVIDIA NIM
+    - model_id: nvidia-1
+      model_name: deepseek-ai/deepseek-v4-pro
+      model_type: NVIDIA
+      api_key: env::NVIDIA_API_KEY
+      endpoint: https://integrate.api.nvidia.com/v1/chat/completions
+      temperature: 0.7
+      max_tokens: 16384
+      timeout: 120
+      system_prompt: "你是一个智能助手"
+      max_threads: 1
+      model_group: PROGRAMMING
+      
+    # 7. 可选：OpenAI GPT-4（示例）
+    # - model_id: openai-1
+    #   model_name: gpt-4-turbo-preview
+    #   model_type: OPENAI
+    #   api_key: env::OPENAI_API_KEY
+    #   endpoint: https://api.openai.com/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 60
+    #   system_prompt: "You are a helpful assistant"
+    
+    # 8. 可选：Claude（示例）
+    # - model_id: claude-1
+    #   model_name: claude-3-opus-20240229
+    #   model_type: ANTHROPIC
+    #   api_key: env::ANTHROPIC_API_KEY
+    #   endpoint: https://api.anthropic.com/v1/messages
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 9. 可选：Groq（示例）
+    # - model_id: groq-1
+    #   model_name: groq-default
+    #   model_type: GROQ
+    #   api_key: env::GROQ_API_KEY
+    #   endpoint: https://api.groq.com/openai/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 10. 可选：Mistral（示例）
+    # - model_id: mistral-1
+    #   model_name: mistral-default
+    #   model_type: MISTRAL
+    #   api_key: env::MISTRAL_API_KEY
+    #   endpoint: https://api.mistral.ai/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 11. 可选：Cohere（示例）
+    # - model_id: cohere-1
+    #   model_name: cohere-default
+    #   model_type: COHERE
+    #   api_key: env::COHERE_API_KEY
+    #   endpoint: https://api.cohere.ai/v1/chat
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 12. 可选：Together AI（示例）
+    # - model_id: together-1
+    #   model_name: together-default
+    #   model_type: TOGETHER
+    #   api_key: env::TOGETHER_API_KEY
+    #   endpoint: https://api.together.ai/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 13. 可选：百度文心（示例）
+    # - model_id: wenxin-1
+    #   model_name: wenxin-default
+    #   model_type: BAIDU_WENXIN
+    #   api_key: env::WENXIN_API_KEY
+    #   secret_key: env::WENXIN_SECRET_KEY
+    #   endpoint: https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 14. 可选：腾讯混元（示例）
+    # - model_id: hunyuan-1
+    #   model_name: hunyuan-default
+    #   model_type: TENCENT_HUNYUAN
+    #   api_key: env::HUNYUAN_API_KEY
+    #   endpoint: https://hunyuan.tencentcloudapi.com
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 15. 可选：月之暗面 Kimi(Moonshot)（示例）
+    # - model_id: moonshot-1
+    #   model_name: moonshot-default
+    #   model_type: MOONSHOT
+    #   api_key: env::MOONSHOT_API_KEY
+    #   endpoint: https://api.moonshot.cn/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 16. 可选：MiniMax（示例）
+    # - model_id: minimax-1
+    #   model_name: minimax-default
+    #   model_type: MINIMAX
+    #   api_key: env::MINIMAX_API_KEY
+    #   endpoint: https://api.minimax.chat/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+
+    # 17. 可选：STEPFUN 阶跃星辰（示例）
+    # - model_id: stepfun-1
+    #   model_name: stepfun-default
+    #   model_type: STEPFUN
+    #   api_key: env::STEPFUN_API_KEY
+    #   endpoint: https://api.stepfun.com/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 18. 可选：LINGYI 零一万物（Yi系列）（示例）
+    # - model_id: lingyi-1
+    #   model_name: lingyi-default
+    #   model_type: LINGYI
+    #   api_key: env::LINGYI_API_KEY
+    #   endpoint: https://api.lingyiwanwu.com/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 19. 可选：GOOGLE Gemini系列（示例）
+    # - model_id: google-1
+    #   model_name: gemini-default
+    #   model_type: GOOGLE
+    #   api_key: env::GOOGLE_API_KEY
+    #   endpoint: https://generativelanguage.googleapis.com/v1/models
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 20. 可选：PERPLEXITY（示例）
+    # - model_id: perplexity-1
+    #   model_name: perplexity-default
+    #   model_type: PERPLEXITY
+    #   api_key: env::PERPLEXITY_API_KEY
+    #   endpoint: https://api.perplexity.ai/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 21. 可选：REPLICATE（示例）
+    # - model_id: replicate-1
+    #   model_name: replicate-default
+    #   model_type: REPLICATE
+    #   api_key: env::REPLICATE_API_KEY
+    #   endpoint: https://api.replicate.com/v1/predictions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 22. 可选：Fireworks AI（示例）
+    # - model_id: fireworks-1
+    #   model_name: fireworks-default
+    #   model_type: FIREWORKS
+    #   api_key: env::FIREWORKS_API_KEY
+    #   endpoint: https://api.fireworks.ai/inference/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 23. 可选：VLLM 部署（示例）
+    # - model_id: vllm-1
+    #   model_name: vllm-default
+    #   model_type: VLLM
+    #   api_key: env::VLLM_API_KEY
+    #   endpoint: http://localhost:8000/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 24. 可选：LOCALAI 部署（示例）
+    # - model_id: localai-1
+    #   model_name: localai-default
+    #   model_type: LOCALAI
+    #   api_key: env::LOCALAI_API_KEY
+    #   endpoint: http://localhost:8080/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 25. 可选：TGI Hugging Face TGI（示例）
+    # - model_id: tgi-1
+    #   model_name: tgi-default
+    #   model_type: TGI
+    #   api_key: env::TGI_API_KEY
+    #   endpoint: http://localhost:8080/generate
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 26. 可选：LLAMACPP llama.cpp 服务器（示例）
+    # - model_id: llamacpp-1
+    #   model_name: llamacpp-default
+    #   model_type: LLAMACPP
+    #   api_key: env::LLAMACPP_API_KEY
+    #   endpoint: http://localhost:8080/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 27. 可选：AZURE_OPENAI（示例）
+    # - model_id: azure-openai-1
+    #   model_name: azure-openai-default
+    #   model_type: AZURE_OPENAI
+    #   api_key: env::AZURE_OPENAI_API_KEY
+    #   endpoint: env::AZURE_OPENAI_ENDPOINT
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+
+    # 28. 可选：GCP_VERTEX Google Cloud Vertex AI（示例）
+    # - model_id: gcp-vertex-1
+    #   model_name: gcp-vertex-default
+    #   model_type: GCP_VERTEX
+    #   api_key: env::GCP_SERVICE_ACCOUNT_KEY
+    #   endpoint: env::GCP_VERTEX_ENDPOINT
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 29. 可选：DIFY 平台（示例）
+    # - model_id: dify-1
+    #   model_name: dify-default
+    #   model_type: DIFY
+    #   api_key: env::DIFY_API_KEY
+    #   endpoint: https://api.dify.ai/v1/chat-messages
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 30. 可选：FASTCHAT（示例）
+    # - model_id: fastchat-1
+    #   model_name: fastchat-default
+    #   model_type: FASTCHAT
+    #   api_key: env::FASTCHAT_API_KEY
+    #   endpoint: http://localhost:8000/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
+
+    # 31. 可选：ANYSCALE Anyscale（示例）
+    # - model_id: anyscale-1
+    #   model_name: anyscale-default
+    #   model_type: ANYSCALE
+    #   api_key: env::ANYSCALE_API_KEY
+    #   endpoint: https://api.endpoints.anyscale.com/v1/chat/completions
+    #   temperature: 0.7
+    #   max_tokens: 4096
+    #   timeout: 120
+    #   system_prompt: "You are a helpful assistant"
