@@ -1,4 +1,3 @@
-import threading
 from model_engine import ModelEngine
 from model_pool import ModelPool
 from logger import logger
@@ -13,10 +12,6 @@ class Agent:
         self.model_pool = model_pool
         self.is_idle = True
         self.current_model_id = None
-
-    def run(self):
-        while True:
-            pass
 
     def execute_task(self, task, model, callback):
         self.is_idle = False
