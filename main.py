@@ -6,6 +6,8 @@ from model_resource import ModelResource, ModelType
 from agent import Agent
 from task import Task
 from logger import logger
+from emailbot import EmailBot
+
 from dotenv import load_dotenv  # 如果用 .env 文件需要这个
 import os
 import time
@@ -13,20 +15,17 @@ import random
 import psutil
 import threading
 import shutil
-from emailbot import EmailBot
 import yaml
 from typing import Dict, Any, Optional
-
-
 
 LONG_CHECK_INTERVAL = 5
 SHORT_CHECK_INTERVAL = 0.1
 TASK_FOLDER = "tasks"
+DEPENDENCY_ROOT = "output"
 CPU_LIMIT = 80
 MAX_AGENT_LIMIT = 100
 stop_flag = False
 agent_id_counter = 1
-DEPENDENCY_ROOT = "output"
 
 # 全局核心实例
 model_engine = ModelEngine()
@@ -150,10 +149,7 @@ def load_config(config_path: str = "config.yaml"):
         
         # 检查间隔
         "check_min": config.get("check", {}).get("min_interval", 3),
-        "check_max": config.get("check", {}).get("max_interval", 8),
-        
-        # 任务目录
-        "task_dir": config.get("task", {}).get("dir", "tasks")
+        "check_max": config.get("check", {}).get("max_interval", 8),        
     } 
 
 # 保留原有MD任务解析、文件移动函数
@@ -296,7 +292,7 @@ def scan_and_dispatch(email_bot):
             move_file_rename_if_exists(file_path, task_done_dir)
 
     # 三方资源匹配调度
-    if not stop_flag:  
+    if not stop_flag:
         # 每次匹配都检查CPU
         cpu_usage = 0
         try:    # 获取当前cpu_usage
