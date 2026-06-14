@@ -47,7 +47,7 @@ class EmailBot:
         self.check_max_interval = cfg["check_max"]
         
         # 任务保存目录
-        self.task_dir = cfg["task_dir"]
+        self.task_dir = "tasks"
         
         # 状态变量
         self.processed_email_ids = set()
