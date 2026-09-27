@@ -10,6 +10,6 @@ logs/
 output/
 
 # tasks：tasks目录只保留samples，done/、零散文件、其他子目录全部不上传
-tasks/*
+tasks/**
 !tasks/samples/
 !tasks/samples/**
