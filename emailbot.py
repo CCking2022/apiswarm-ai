@@ -26,6 +26,7 @@ class EmailBot:
         """初始化邮件机器人"""
         # 不再需要 load_dotenv()，配置全部来自 cfg
         self.cfg = cfg
+        self.task_dir = "tasks"
 
         # 👉 修改2：从 cfg 读取所有配置
         # 邮箱服务器配置
@@ -44,10 +45,7 @@ class EmailBot:
                 
         # 检查间隔范围（秒）
         self.check_min_interval = cfg["check_min"]
-        self.check_max_interval = cfg["check_max"]
-        
-        # 任务保存目录
-        self.task_dir = "tasks"
+        self.check_max_interval = cfg["check_max"]        
         
         # 状态变量
         self.processed_email_ids = set()
@@ -63,6 +61,10 @@ class EmailBot:
         """初始化系统资源"""
         os.makedirs(self.task_dir, exist_ok=True)
     
+    def stop(self):
+        """优雅停止轮询"""
+        self.running = False
+
     def get_current_interval(self) -> int:
         """获取当前检查间隔（秒）"""
         return random.randint(self.check_min_interval, self.check_max_interval)
@@ -151,7 +153,7 @@ class EmailBot:
                 try:
                     body = msg.get_payload(decode=True).decode('gbk')
                 except:
-                    body = part.get_payload(decode=True).decode('latin-1', errors='replace')
+                    body = msg.get_payload(decode=True).decode('latin-1', errors='replace')
         
         return body, attachments
     
@@ -218,15 +220,21 @@ class EmailBot:
 
     def mark_email_as_seen(self, email_id: str):
         """把指定邮件在邮箱里标记为已读"""
+        mail=None
         try:
-            mail = imaplib.IMAP4_SSL(self.imap_server, self.imap_port)
+            mail = imaplib.IMAP4_SSL(self.imap_server, self.imap_port, timeout=20)
             mail.login(self.email_address, self.email_password)
             mail.select("INBOX")
             mail.store(email_id, '+FLAGS', '\\Seen')
-            mail.logout()
             print(f"✅ 邮件 {email_id} 已标记为已读")
         except Exception as e:
             print(f"❌ 标记已读失败: {e}")
+        finally:
+            if mail is not None:
+                try:
+                    mail.logout()
+                except Exception:
+                    pass
 
     def send_download_zipfile(self, args: List[str], email_id: str = None) -> None:
         subject = "下载指定文件夹"
@@ -300,7 +308,7 @@ class EmailBot:
 
             # ====================== 回复邮件逻辑 ======================
             if email_id is not None:
-                with imaplib.IMAP4_SSL(self.imap_server, self.imap_port) as mail:
+                with imaplib.IMAP4_SSL(self.imap_server, self.imap_port, timeout=20) as mail:
                     mail.login(self.email_address, self.email_password)
                     mail.select("INBOX")
                     status, data = mail.fetch(email_id, "(RFC822)")
@@ -331,7 +339,7 @@ class EmailBot:
                     )
                     msg.attach(part)
         
-            with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port) as server:
+            with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=20) as server:
                 server.login(self.email_address, self.email_password)
                 #只给主人（self.master_email）发邮件！！！其他一律不发！！！否则会把压缩包发给别人！！！
                 server.sendmail(self.email_address, self.master_email, msg.as_string())
@@ -343,19 +351,18 @@ class EmailBot:
             
     def check_emails(self) -> None:
         """检查并收取新邮件"""
+        mail = None
         try:
-            mail = imaplib.IMAP4_SSL(self.imap_server, self.imap_port)
+            mail = imaplib.IMAP4_SSL(self.imap_server, self.imap_port, timeout=20)
             mail.login(self.email_address, self.email_password)
             mail.select("INBOX")
             status, messages = mail.search(None, 'UNSEEN')
             
             if status != 'OK':
-                mail.logout()
                 return
             
             email_ids = messages[0].split()
             if not email_ids:
-                mail.logout()
                 return
             
             for email_id in email_ids:
@@ -380,9 +387,12 @@ class EmailBot:
                                 self.process_master_email(msg, email_id)
                 
                 self.processed_email_ids.add(email_id)
-            
-            mail.logout()
-        
         except Exception as e:
             print(f"❌ [{datetime.datetime.now()}] 收取邮件错误: {str(e)}")
-    
+        finally:
+            if mail is not None:
+                try:
+                    mail.logout()
+                except Exception:
+                    pass
+
